@@ -193,12 +193,12 @@ export default function ChallengePortal() {
 
   return (
     <div className="min-h-screen bg-background p-6 max-w-[1200px] mx-auto">
-      <header className="mb-8 flex items-center justify-between">
+      <header className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight">The Data Heist</h1>
           <p className="text-muted-foreground mt-1">Operative: <span className="font-bold text-foreground">{userName}</span></p>
         </div>
-        <div className="flex gap-2 p-1 bg-muted rounded-[var(--radius-md)]">
+        <div className="flex w-full md:w-auto overflow-x-auto gap-2 p-1 bg-muted rounded-[var(--radius-md)]">
           <button 
             className={`px-4 py-2 text-sm font-bold rounded-[var(--radius-sm)] ${activeTab === 'rest' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
             onClick={() => setActiveTab('rest')}
@@ -233,7 +233,7 @@ export default function ChallengePortal() {
                 Extract the <strong>email addresses</strong> of every single person who has commented on any post written by <strong>Alice Smith</strong>.
               </p>
               
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
                 <select 
                   className="bg-background border border-border rounded-[var(--radius-sm)] px-3 py-2 text-sm outline-none"
                   value={restMethod}
@@ -283,7 +283,7 @@ export default function ChallengePortal() {
             </div>
           </div>
 
-          <div className="bg-card border border-border p-6 rounded-[var(--radius-lg)] h-[calc(100vh-180px)] overflow-auto">
+          <div className="bg-card border border-border p-6 rounded-[var(--radius-lg)] h-[400px] lg:h-[calc(100vh-180px)] overflow-auto">
             <h2 className="text-xl font-bold mb-4">Network Footprint</h2>
             <div className="flex justify-between text-sm mb-6 border-b border-border pb-4">
               <div><span className="text-muted-foreground">Requests:</span> <strong className="text-destructive">{restRequests.length}</strong></div>
@@ -355,7 +355,7 @@ export default function ChallengePortal() {
             </div>
           </div>
 
-          <div className="bg-card border border-border p-6 rounded-[var(--radius-lg)] h-[calc(100vh-180px)] overflow-auto">
+          <div className="bg-card border border-border p-6 rounded-[var(--radius-lg)] h-[400px] lg:h-[calc(100vh-180px)] overflow-auto">
             <h2 className="text-xl font-bold mb-4">Network Footprint</h2>
             <div className="flex justify-between text-sm mb-6 border-b border-border pb-4">
               <div><span className="text-muted-foreground">Requests:</span> <strong className="text-success">{gqlRequests.length}</strong></div>
