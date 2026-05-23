@@ -18,6 +18,7 @@ const TARGET_EMAILS_GQL = [
 interface RequestMetric {
   url: string;
   method: string;
+  status: number;
   timeMs: number;
   sizeBytes: number;
 }
@@ -71,14 +72,27 @@ export default function ChallengePortal() {
     const start = performance.now();
     try {
       const res = await fetch(restUrl, { method: restMethod });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = { error: 'Invalid JSON response format' };
+      }
+      
       const timeMs = performance.now() - start;
       const sizeBytes = new Blob([JSON.stringify(data)]).size;
       
-      setRestRequests(prev => [...prev, { url: restUrl, method: restMethod, timeMs, sizeBytes }]);
-      setRestResponse(data);
-    } catch (e) {
-      setRestResponse({ error: 'Request failed' });
+      setRestRequests(prev => [...prev, { url: restUrl, method: restMethod, status: res.status, timeMs, sizeBytes }]);
+      
+      if (!res.ok) {
+        setRestResponse({ error: `HTTP Error ${res.status}: ${res.statusText}`, details: data });
+      } else {
+        setRestResponse(data);
+      }
+    } catch (e: any) {
+      setRestResponse({ error: e.message || 'Network request failed. Check URL.' });
+      setRestRequests(prev => [...prev, { url: restUrl, method: restMethod, status: 0, timeMs: performance.now() - start, sizeBytes: 0 }]);
     }
   };
 
@@ -121,14 +135,27 @@ export default function ChallengePortal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: gqlQuery })
       });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = { error: 'Invalid JSON response from GraphQL' };
+      }
+      
       const timeMs = performance.now() - start;
       const sizeBytes = new Blob([JSON.stringify(data)]).size;
       
-      setGqlRequests(prev => [...prev, { url: '/api/graphql', method: 'POST', timeMs, sizeBytes }]);
-      setGqlResponse(data);
-    } catch (e) {
-      setGqlResponse({ error: 'Query failed' });
+      setGqlRequests(prev => [...prev, { url: '/api/graphql', method: 'POST', status: res.status, timeMs, sizeBytes }]);
+      
+      if (!res.ok) {
+        setGqlResponse({ error: `HTTP Error ${res.status}: ${res.statusText}`, details: data });
+      } else {
+        setGqlResponse(data);
+      }
+    } catch (e: any) {
+      setGqlResponse({ error: e.message || 'GraphQL network request failed.' });
+      setGqlRequests(prev => [...prev, { url: '/api/graphql', method: 'POST', status: 0, timeMs: performance.now() - start, sizeBytes: 0 }]);
     }
   };
 
@@ -292,9 +319,15 @@ export default function ChallengePortal() {
             
             <div className="space-y-3">
               {restRequests.map((req, i) => (
-                <div key={i} className="text-xs bg-muted p-3 rounded-[var(--radius-sm)] flex justify-between items-center">
-                  <span className="font-mono truncate mr-2"><span className="text-destructive font-bold mr-2">{req.method}</span>{req.url}</span>
-                  <span className="text-muted-foreground whitespace-nowrap">{req.timeMs.toFixed(0)}ms | {(req.sizeBytes/1024).toFixed(1)}KB</span>
+                <div key={i} className="text-xs bg-muted p-3 rounded-[var(--radius-sm)] flex justify-between items-center gap-2">
+                  <div className="flex items-center truncate">
+                    <span className="text-destructive font-bold mr-2 w-8 shrink-0">{req.method}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold mr-2 shrink-0 ${req.status >= 200 && req.status < 300 ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'}`}>
+                      {req.status === 0 ? 'ERR' : req.status}
+                    </span>
+                    <span className="font-mono truncate">{req.url}</span>
+                  </div>
+                  <span className="text-muted-foreground whitespace-nowrap shrink-0">{req.timeMs.toFixed(0)}ms | {(req.sizeBytes/1024).toFixed(1)}KB</span>
                 </div>
               ))}
             </div>
@@ -364,9 +397,15 @@ export default function ChallengePortal() {
             
             <div className="space-y-3">
               {gqlRequests.map((req, i) => (
-                <div key={i} className="text-xs bg-muted p-3 rounded-[var(--radius-sm)] flex justify-between items-center">
-                  <span className="font-mono truncate mr-2"><span className="text-success font-bold mr-2">{req.method}</span>{req.url}</span>
-                  <span className="text-muted-foreground whitespace-nowrap">{req.timeMs.toFixed(0)}ms | {(req.sizeBytes/1024).toFixed(1)}KB</span>
+                <div key={i} className="text-xs bg-muted p-3 rounded-[var(--radius-sm)] flex justify-between items-center gap-2">
+                  <div className="flex items-center truncate">
+                    <span className="text-success font-bold mr-2 w-10 shrink-0">{req.method}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold mr-2 shrink-0 ${req.status >= 200 && req.status < 300 ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'}`}>
+                      {req.status === 0 ? 'ERR' : req.status}
+                    </span>
+                    <span className="font-mono truncate">{req.url}</span>
+                  </div>
+                  <span className="text-muted-foreground whitespace-nowrap shrink-0">{req.timeMs.toFixed(0)}ms | {(req.sizeBytes/1024).toFixed(1)}KB</span>
                 </div>
               ))}
             </div>
