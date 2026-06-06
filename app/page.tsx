@@ -64,7 +64,41 @@ export default function ChallengePortal() {
     setIsStarted(true);
     setRestStartTime(Date.now());
     setGqlStartTime(Date.now());
+
+    fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName })
+    });
   };
+
+  useEffect(() => {
+    if (isStarted && restRequests.length > 0) {
+      fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName,
+          restRequests: restRequests.length,
+          restSizeBytes: restRequests.reduce((acc, req) => acc + req.sizeBytes, 0)
+        })
+      });
+    }
+  }, [restRequests, isStarted, userName]);
+
+  useEffect(() => {
+    if (isStarted && gqlRequests.length > 0) {
+      fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName,
+          gqlRequests: gqlRequests.length,
+          gqlSizeBytes: gqlRequests.reduce((acc, req) => acc + req.sizeBytes, 0)
+        })
+      });
+    }
+  }, [gqlRequests, isStarted, userName]);
 
   const handleRestRequest = async () => {
     if (!restStartTime) setRestStartTime(Date.now());

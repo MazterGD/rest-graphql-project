@@ -42,16 +42,12 @@ export async function POST(request: Request) {
 
     const payload = {
       team_name: entry.userName,
-      ...(entry.restTimeMs !== undefined && { 
-        rest_time_ms: entry.restTimeMs,
-        rest_requests: entry.restRequests,
-        rest_size_bytes: entry.restSizeBytes,
-      }),
-      ...(entry.gqlTimeMs !== undefined && { 
-        gql_time_ms: entry.gqlTimeMs,
-        gql_requests: entry.gqlRequests,
-        gql_size_bytes: entry.gqlSizeBytes,
-      }),
+      ...(entry.restTimeMs !== undefined && { rest_time_ms: entry.restTimeMs }),
+      ...(entry.restRequests !== undefined && { rest_requests: entry.restRequests }),
+      ...(entry.restSizeBytes !== undefined && { rest_size_bytes: entry.restSizeBytes }),
+      ...(entry.gqlTimeMs !== undefined && { gql_time_ms: entry.gqlTimeMs }),
+      ...(entry.gqlRequests !== undefined && { gql_requests: entry.gqlRequests }),
+      ...(entry.gqlSizeBytes !== undefined && { gql_size_bytes: entry.gqlSizeBytes }),
       updated_at: new Date().toISOString()
     };
 
